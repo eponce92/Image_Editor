@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import os
-from app.config import CannySettings
+from app.config import CannySettings, OUTPUT_DIR
 import logging
 from dataclasses import dataclass
 
@@ -49,12 +49,11 @@ class CannyEdgePreprocessor:
             )
             edges = cv2.dilate(edges, kernel, iterations=self.params.dilate_iterations)
 
-        # Create white background with black edges
-        final_image = np.zeros_like(image)  # Create blank BGR image
-        final_image.fill(255)  # Fill with white
+        # Create black background with white edges
+        final_image = np.zeros_like(image)  # Create blank BGR image (black)
         
-        # Set edges to black (all channels)
-        final_image[edges > 0] = [0, 0, 0]
+        # Set edges to white (all channels)
+        final_image[edges > 0] = [255, 255, 255]
 
         return final_image
 
@@ -65,6 +64,9 @@ class ImageProcessor:
         
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"Image file not found: {image_path}")
+
+        # Create output directory if it doesn't exist
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
 
         if process_type == "canny":
             return ImageProcessor.apply_canny(image_path, params)
@@ -94,12 +96,10 @@ class ImageProcessor:
             # Process the image
             final_image = canny_processor.process(image)
             
-            # Save processed image
-            base_path = os.path.splitext(image_path)[0]
-            output_path = f"{base_path}_canny.png"
-            
-            # Ensure the output directory exists
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            # Save processed image in outputs directory
+            filename = os.path.basename(image_path)
+            base_name = os.path.splitext(filename)[0]
+            output_path = os.path.join(OUTPUT_DIR, f"{base_name}_canny.png")
             
             cv2.imwrite(output_path, final_image)
             logging.info(f"Saved processed image to: {output_path}")

@@ -4,7 +4,12 @@ import os
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
 UPLOAD_DIR = "uploads"
+OUTPUT_DIR = "outputs"
 SETTINGS_FILE = "settings.json"
+
+# Create necessary directories
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Image settings
 DEFAULT_IMAGE_SIZE = {

@@ -4,6 +4,7 @@ import fal_client
 from app.ui.sidebar import Sidebar
 from app.services.fal_service import FalService
 from app.services.image_processor import ImageProcessor
+from app.utils.settings_manager import SettingsManager  # Add this import
 from app.config import WINDOW_WIDTH, WINDOW_HEIGHT, UPLOAD_DIR
 import logging
 import time
@@ -24,7 +25,22 @@ class ImageGeneratorApp:
         self.page.window_height = WINDOW_HEIGHT
 
     def setup_components(self):
-        self.sidebar = Sidebar(self.page)
+        # Load settings first
+        settings = SettingsManager.load_settings()
+        
+        # Setup strength slider
+        self.strength_slider = ft.Slider(
+            min=0.1,
+            max=1.0,
+            value=settings.get("strength", 0.85),
+            label="Strength: {value}",
+            width=600,
+            on_change=self.on_strength_change
+        )
+        
+        # Create sidebar with strength slider reference
+        self.sidebar = Sidebar(self.page, self.strength_slider)
+        
         # Add callback for Canny settings changes
         self.sidebar.canny_controls.on_settings_change = self.on_canny_settings_change
         self.setup_main_content()
@@ -77,14 +93,6 @@ class ImageGeneratorApp:
             multiline=True,
             min_lines=2,
             max_lines=4
-        )
-
-        self.strength_slider = ft.Slider(
-            min=0.1,
-            max=1.0,
-            value=0.85,
-            label="Strength: {value}",
-            width=600
         )
 
     def pick_files_result(self, e: ft.FilePickerResultEvent):
@@ -323,6 +331,12 @@ class ImageGeneratorApp:
         if (self.source_image.value and 
             self.sidebar.controlnet_type.value == "canny"):
             self.preprocess_image(None)
+
+    def on_strength_change(self, e):
+        """Save strength value when it changes"""
+        settings = SettingsManager.load_settings()
+        settings["strength"] = self.strength_slider.value
+        SettingsManager.save_settings(settings)
 
 def main(page: ft.Page):
     ImageGeneratorApp(page)

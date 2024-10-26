@@ -1,0 +1,952 @@
+
+Documentation
+Search documentation…
+Quickstart with fal
+Fastest SDXL in the Planet 🌎
+Real Time Models ⚡️
+Introduction
+Quickstart
+Keeping fal API Key and Secret Safe
+Model Endpoints
+Introduction
+Queue
+Webhooks
+Server-side integration
+Workflows
+Clients
+Libraries
+JavaScript / TypeScript
+Python
+Swift (iOS)
+Java
+Kotlin
+Dart (Flutter)
+Private Serverless Models on GPUs
+Introduction
+Accessing Persistent Storage
+Return Files and Images from Functions
+Setting Secrets
+Data Validation with Pydantic
+Optimizing Routing Behavior
+Real-time endpoints & WebSockets
+Optimize Models Using fal's Inference Engine
+Running a Containerized Model
+Authentication
+Auth methods
+Key-based
+GitHub
+Integrations
+Next.js
+Vercel
+Examples
+Index
+Diffusion models
+Llama 2 with vLLM
+Running a container as a function
+Supported machines
+Migrating from Other Platforms
+Migrating from Replicate
+Guidelines
+Writing efficient Dockerfiles for faster builds
+Advanced reference
+FAQ
+Documentation
+Clients
+Python
+Client Library for Python
+Introduction
+The client for Python provides a seamless interface to interact with fal.
+
+Installation
+First, add the client as a dependency in your project:
+
+pip install fal-client
+
+Features
+1. Call an endpoint
+Endpoints requests are managed by a queue system. This allows fal to provide a reliable and scalable service.
+
+The subscribe method allows you to submit a request to the queue and wait for the result.
+
+import asyncio
+import fal_client
+ 
+async def subscribe():
+    def on_queue_update(update):
+        if isinstance(update, fal_client.InProgress):
+            for log in update.logs:
+                print(log["message"])
+ 
+    result = await fal_client.subscribe_async(
+        "fal-ai/flux/dev",
+        arguments={
+            "prompt": "a cat",
+            "seed": 6252023,
+            "image_size": "landscape_4_3",
+            "num_images": 4
+        },
+        on_queue_update=on_queue_update,
+    )
+ 
+    print(result)
+ 
+ 
+if __name__ == "__main__":
+    asyncio.run(subscribe())
+
+2. Queue Management
+You can manage the queue using the following methods:
+
+Submit a Request
+Submit a request to the queue using the queue.submit method.
+
+import asyncio
+import fal_client
+ 
+async def submit():
+    handler = await fal_client.submit_async(
+        "fal-ai/flux/dev",
+        arguments={
+            "prompt": "a cat",
+            "seed": 6252023,
+            "image_size": "landscape_4_3",
+            "num_images": 4
+        },
+    )
+ 
+    request_id = handler.request_id
+    print(request_id)
+
+This is useful when you want to submit a request to the queue and retrieve the result later. You can save the request_id and use it to retrieve the result later.
+
+Webhooks
+For long-running requests, such as training jobs, you can use webhooks to receive the result asynchronously. You can specify the webhook URL when submitting a request.
+
+Check Request Status
+Retrieve the status of a specific request in the queue:
+
+status = await fal_client.status_async("fal-ai/flux/dev", request_id, with_logs=True)
+
+Retrieve Request Result
+Get the result of a specific request from the queue:
+
+result = await fal_client.result_async("fal-ai/flux/dev", request_id)
+
+3. File Uploads
+Some endpoints require files as input. However, since the endpoints run asynchronously, processed by the queue, you will need to provide URLs to the files instead of the actual file content.
+
+Luckily, the client library provides a way to upload files to the server and get a URL to use in the request.
+
+url = fal_client.upload_file_async("path/to/file")
+
+4. Streaming
+Some endpoints support streaming:
+
+import asyncio
+import fal_client
+ 
+async def stream():
+    stream = fal_client.stream_async(
+        "fal-ai/flux/dev",
+        arguments={
+            "prompt": "a cat",
+            "seed": 6252023,
+            "image_size": "landscape_4_3",
+            "num_images": 4
+        },
+    )
+    async for event in stream:
+        print(event)
+ 
+ 
+if __name__ == "__main__":
+    asyncio.run(stream())
+
+5. Realtime Communication
+For the endpoints that support real-time inference via WebSockets, you can use the realtime client that abstracts the WebSocket connection, re-connection, serialization, and provides a simple interface to interact with the endpoint:
+
+Not implemented yet
+This functionality is not available on this client yet.
+
+6. Run
+The endpoints can also be called directly instead of using the queue system.
+
+Prefer the queue
+We do not recommend this use most use cases as it will block the client until the response is received. Moreover, if the connection is closed before the response is received, the request will be lost.
+
+import asyncio
+import fal_client
+ 
+async def submit():
+    result = await fal_client.run_async(
+        "fal-ai/flux/dev",
+        arguments={
+            "prompt": "a cat",
+            "seed": 6252023,
+            "image_size": "landscape_4_3",
+            "num_images": 4
+        },
+    )
+ 
+    print(result)
+ 
+ 
+if __name__ == "__main__":
+    asyncio.run(submit())
+
+API Reference
+For a complete list of available methods and their parameters, please refer to Python API Reference documentation.
+
+Support
+If you encounter any issues or have questions, please visit the GitHub repository or join our Discord Community.
+
+Last updated on October 21, 2024
+JavaScript / TypeScript
+Swift (iOS)
+2023 © Features and Labels Inc.
+Client Library for Python - fal docs
+
+
+fal_client
+fal_client package
+Submodules
+fal_client.auth module
+MissingCredentialsError
+fetch_credentials()
+fal_client.client module
+AppId
+AppId.alias
+AppId.from_endpoint_id()
+AppId.namespace
+AppId.owner
+AppId.path
+AsyncCDNTokenManager
+AsyncCDNTokenManager.get_token()
+AsyncClient
+AsyncClient.cancel()
+AsyncClient.default_timeout
+AsyncClient.get_handle()
+AsyncClient.key
+AsyncClient.result()
+AsyncClient.run()
+AsyncClient.status()
+AsyncClient.stream()
+AsyncClient.submit()
+AsyncClient.subscribe()
+AsyncClient.upload()
+AsyncClient.upload_file()
+AsyncClient.upload_image()
+AsyncRequestHandle
+AsyncRequestHandle.cancel()
+AsyncRequestHandle.client
+AsyncRequestHandle.from_request_id()
+AsyncRequestHandle.get()
+AsyncRequestHandle.iter_events()
+AsyncRequestHandle.status()
+CDNToken
+CDNToken.base_upload_url
+CDNToken.expires_at
+CDNToken.is_expired()
+CDNToken.token
+CDNToken.token_type
+CDNTokenManager
+CDNTokenManager.get_token()
+Completed
+Completed.logs
+Completed.metrics
+FalClientError
+InProgress
+InProgress.logs
+Queued
+Queued.position
+Status
+SyncClient
+SyncClient.cancel()
+SyncClient.default_timeout
+SyncClient.get_handle()
+SyncClient.key
+SyncClient.result()
+SyncClient.run()
+SyncClient.status()
+SyncClient.stream()
+SyncClient.submit()
+SyncClient.subscribe()
+SyncClient.upload()
+SyncClient.upload_file()
+SyncClient.upload_image()
+SyncRequestHandle
+SyncRequestHandle.cancel()
+SyncRequestHandle.client
+SyncRequestHandle.from_request_id()
+SyncRequestHandle.get()
+SyncRequestHandle.iter_events()
+SyncRequestHandle.status()
+encode()
+encode_file()
+encode_image()
+Module contents
+AsyncClient
+AsyncClient.cancel()
+AsyncClient.default_timeout
+AsyncClient.get_handle()
+AsyncClient.key
+AsyncClient.result()
+AsyncClient.run()
+AsyncClient.status()
+AsyncClient.stream()
+AsyncClient.submit()
+AsyncClient.subscribe()
+AsyncClient.upload()
+AsyncClient.upload_file()
+AsyncClient.upload_image()
+AsyncRequestHandle
+AsyncRequestHandle.cancel()
+AsyncRequestHandle.cancel_url
+AsyncRequestHandle.client
+AsyncRequestHandle.from_request_id()
+AsyncRequestHandle.get()
+AsyncRequestHandle.iter_events()
+AsyncRequestHandle.request_id
+AsyncRequestHandle.response_url
+AsyncRequestHandle.status()
+AsyncRequestHandle.status_url
+Completed
+Completed.logs
+Completed.metrics
+InProgress
+InProgress.logs
+Queued
+Queued.position
+Status
+SyncClient
+SyncClient.cancel()
+SyncClient.default_timeout
+SyncClient.get_handle()
+SyncClient.key
+SyncClient.result()
+SyncClient.run()
+SyncClient.status()
+SyncClient.stream()
+SyncClient.submit()
+SyncClient.subscribe()
+SyncClient.upload()
+SyncClient.upload_file()
+SyncClient.upload_image()
+SyncRequestHandle
+SyncRequestHandle.cancel()
+SyncRequestHandle.cancel_url
+SyncRequestHandle.client
+SyncRequestHandle.from_request_id()
+SyncRequestHandle.get()
+SyncRequestHandle.iter_events()
+SyncRequestHandle.request_id
+SyncRequestHandle.response_url
+SyncRequestHandle.status()
+SyncRequestHandle.status_url
+cancel()
+cancel_async()
+encode()
+encode_file()
+encode_image()
+result()
+result_async()
+run()
+run_async()
+status()
+status_async()
+stream()
+stream_async()
+submit()
+submit_async()
+subscribe()
+subscribe_async()
+fal_client
+Search
+Navigation
+Contents:
+
+fal_client
+fal_client package
+©2024, FAL Team. | Powered by Sphinx 8.1.3 & Alabaster 1.0.0 | Page source
+
+fal_client package
+Submodules
+fal_client.auth module
+exception fal_client.auth.MissingCredentialsError
+Bases: Exception
+
+fal_client.auth.fetch_credentials()
+Return type:
+str
+
+fal_client.client module
+class fal_client.client.AppId(owner, alias, path, namespace)
+Bases: object
+
+alias: str
+classmethod from_endpoint_id(endpoint_id)
+Return type:
+AppId
+
+namespace: Optional[str]
+owner: str
+path: Optional[str]
+class fal_client.client.AsyncCDNTokenManager(key)
+Bases: object
+
+async get_token()
+Return type:
+CDNToken
+
+class fal_client.client.AsyncClient(key=None, default_timeout=120.0)
+Bases: object
+
+async cancel(application, request_id)
+Return type:
+None
+
+default_timeout: float = 120.0
+get_handle(application, request_id)
+Return type:
+AsyncRequestHandle
+
+key: str | None = None
+async result(application, request_id)
+Return type:
+dict[str, Any]
+
+async run(application, arguments, *, path='', timeout=None, hint=None)
+Run an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return the result of the inference call directly.
+
+Return type:
+dict[str, Any]
+
+async status(application, request_id, *, with_logs=False)
+Return type:
+Status
+
+async stream(application, arguments, *, path='/stream', timeout=None)
+Stream the output of an application with the given arguments (which will be JSON serialized). This is only supported at a few select applications at the moment, so be sure to first consult with the documentation of individual applications to see if this is supported.
+
+The function will iterate over each event that is streamed from the server.
+
+Return type:
+AsyncIterator[dict[str, Any]]
+
+async submit(application, arguments, *, path='', hint=None, webhook_url=None, priority=None)
+Submit an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return a handle to the request that can be used to check the status and retrieve the result of the inference call when it is done.
+
+Return type:
+AsyncRequestHandle
+
+async subscribe(application, arguments, *, path='', hint=None, with_logs=False, on_enqueue=None, on_queue_update=None, priority=None)
+async upload(data, content_type, file_name=None)
+Upload the given data blob to the CDN and return the access URL. The content type should be specified as the second argument. Use upload_file or upload_image for convenience.
+
+Return type:
+str
+
+async upload_file(path)
+Upload a file from the local filesystem to the CDN and return the access URL.
+
+Return type:
+str
+
+async upload_image(image, format='jpeg')
+Upload a pillow image object to the CDN and return the access URL.
+
+Return type:
+str
+
+class fal_client.client.AsyncRequestHandle(request_id, response_url, status_url, cancel_url, client)
+Bases: _BaseRequestHandle
+
+async cancel()
+Cancel the request.
+
+Return type:
+None
+
+client: AsyncClient
+classmethod from_request_id(client, application, request_id)
+Return type:
+AsyncRequestHandle
+
+async get()
+Wait till the request is completed and return the result.
+
+Return type:
+dict[str, Any]
+
+async iter_events(*, with_logs=False, interval=0.1)
+Continuously poll for the status of the request and yield it at each interval till the request is completed. If with_logs is True, logs will be included in the response.
+
+Return type:
+AsyncIterator[Status]
+
+async status(*, with_logs=False)
+Returns the status of the request (which can be one of the following: Queued, InProgress, Completed). If with_logs is True, logs will be included for InProgress and Completed statuses.
+
+Return type:
+Status
+
+class fal_client.client.CDNToken(token, token_type, base_upload_url, expires_at)
+Bases: object
+
+base_upload_url: str
+expires_at: datetime
+is_expired()
+Return type:
+bool
+
+token: str
+token_type: str
+class fal_client.client.CDNTokenManager(key)
+Bases: object
+
+get_token()
+Return type:
+CDNToken
+
+class fal_client.client.Completed(logs, metrics)
+Bases: Status
+
+Indicates the request has been completed and the result can be gathered. The logs field will contain the logs if the status operation was called with the with_logs parameter set to True. Metrics might contain the inference time, and other internal metadata (number of tokens processed, etc.).
+
+logs: list[dict[str, Any]] | None
+metrics: dict[str, Any]
+exception fal_client.client.FalClientError
+Bases: Exception
+
+class fal_client.client.InProgress(logs)
+Bases: Status
+
+Indicates the request is currently being processed. If the status operation called with the with_logs parameter set to True, the logs field will be a list of log objects.
+
+logs: list[dict[str, Any]] | None
+class fal_client.client.Queued(position)
+Bases: Status
+
+Indicates the request is enqueued and waiting to be processed. The position field indicates the relative position in the queue (0-indexed).
+
+position: int
+class fal_client.client.Status
+Bases: object
+
+class fal_client.client.SyncClient(key=None, default_timeout=120.0)
+Bases: object
+
+cancel(application, request_id)
+Return type:
+None
+
+default_timeout: float = 120.0
+get_handle(application, request_id)
+Return type:
+SyncRequestHandle
+
+key: str | None = None
+result(application, request_id)
+Return type:
+dict[str, Any]
+
+run(application, arguments, *, path='', timeout=None, hint=None)
+Run an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return the result of the inference call directly.
+
+Return type:
+dict[str, Any]
+
+status(application, request_id, *, with_logs=False)
+Return type:
+Status
+
+stream(application, arguments, *, path='/stream', timeout=None)
+Stream the output of an application with the given arguments (which will be JSON serialized). This is only supported at a few select applications at the moment, so be sure to first consult with the documentation of individual applications to see if this is supported.
+
+The function will iterate over each event that is streamed from the server.
+
+Return type:
+Iterator[dict[str, Any]]
+
+submit(application, arguments, *, path='', hint=None, webhook_url=None, priority=None)
+Submit an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return a handle to the request that can be used to check the status and retrieve the result of the inference call when it is done.
+
+Return type:
+SyncRequestHandle
+
+subscribe(application, arguments, *, path='', hint=None, with_logs=False, on_enqueue=None, on_queue_update=None, priority=None)
+upload(data, content_type, file_name=None)
+Upload the given data blob to the CDN and return the access URL. The content type should be specified as the second argument. Use upload_file or upload_image for convenience.
+
+Return type:
+str
+
+upload_file(path)
+Upload a file from the local filesystem to the CDN and return the access URL.
+
+Return type:
+str
+
+upload_image(image, format='jpeg')
+Upload a pillow image object to the CDN and return the access URL.
+
+Return type:
+str
+
+class fal_client.client.SyncRequestHandle(request_id, response_url, status_url, cancel_url, client)
+Bases: _BaseRequestHandle
+
+cancel()
+Cancel the request.
+
+Return type:
+None
+
+client: Client
+classmethod from_request_id(client, application, request_id)
+Return type:
+SyncRequestHandle
+
+get()
+Wait till the request is completed and return the result of the inference call.
+
+Return type:
+dict[str, Any]
+
+iter_events(*, with_logs=False, interval=0.1)
+Continuously poll for the status of the request and yield it at each interval till the request is completed. If with_logs is True, logs will be included in the response.
+
+Return type:
+Iterator[Status]
+
+status(*, with_logs=False)
+Returns the status of the request (which can be one of the following: Queued, InProgress, Completed). If with_logs is True, logs will be included for InProgress and Completed statuses.
+
+Return type:
+Status
+
+fal_client.client.encode(data, content_type)
+Encode the given data blob to a data URL with the specified content type.
+
+Return type:
+str
+
+fal_client.client.encode_file(path)
+Encode a file from the local filesystem to a data URL with the inferred content type.
+
+Return type:
+str
+
+fal_client.client.encode_image(image, format='jpeg')
+Encode a pillow image object to a data URL with the specified format.
+
+Return type:
+str
+
+Module contents
+class fal_client.AsyncClient(key=None, default_timeout=120.0)
+Bases: object
+
+async cancel(application, request_id)
+Return type:
+None
+
+default_timeout: float = 120.0
+get_handle(application, request_id)
+Return type:
+AsyncRequestHandle
+
+key: str | None = None
+async result(application, request_id)
+Return type:
+dict[str, Any]
+
+async run(application, arguments, *, path='', timeout=None, hint=None)
+Run an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return the result of the inference call directly.
+
+Return type:
+dict[str, Any]
+
+async status(application, request_id, *, with_logs=False)
+Return type:
+Status
+
+async stream(application, arguments, *, path='/stream', timeout=None)
+Stream the output of an application with the given arguments (which will be JSON serialized). This is only supported at a few select applications at the moment, so be sure to first consult with the documentation of individual applications to see if this is supported.
+
+The function will iterate over each event that is streamed from the server.
+
+Return type:
+AsyncIterator[dict[str, Any]]
+
+async submit(application, arguments, *, path='', hint=None, webhook_url=None, priority=None)
+Submit an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return a handle to the request that can be used to check the status and retrieve the result of the inference call when it is done.
+
+Return type:
+AsyncRequestHandle
+
+async subscribe(application, arguments, *, path='', hint=None, with_logs=False, on_enqueue=None, on_queue_update=None, priority=None)
+async upload(data, content_type, file_name=None)
+Upload the given data blob to the CDN and return the access URL. The content type should be specified as the second argument. Use upload_file or upload_image for convenience.
+
+Return type:
+str
+
+async upload_file(path)
+Upload a file from the local filesystem to the CDN and return the access URL.
+
+Return type:
+str
+
+async upload_image(image, format='jpeg')
+Upload a pillow image object to the CDN and return the access URL.
+
+Return type:
+str
+
+class fal_client.AsyncRequestHandle(request_id, response_url, status_url, cancel_url, client)
+Bases: _BaseRequestHandle
+
+async cancel()
+Cancel the request.
+
+Return type:
+None
+
+cancel_url: str
+client: AsyncClient
+classmethod from_request_id(client, application, request_id)
+Return type:
+AsyncRequestHandle
+
+async get()
+Wait till the request is completed and return the result.
+
+Return type:
+dict[str, Any]
+
+async iter_events(*, with_logs=False, interval=0.1)
+Continuously poll for the status of the request and yield it at each interval till the request is completed. If with_logs is True, logs will be included in the response.
+
+Return type:
+AsyncIterator[Status]
+
+request_id: str
+response_url: str
+async status(*, with_logs=False)
+Returns the status of the request (which can be one of the following: Queued, InProgress, Completed). If with_logs is True, logs will be included for InProgress and Completed statuses.
+
+Return type:
+Status
+
+status_url: str
+class fal_client.Completed(logs, metrics)
+Bases: Status
+
+Indicates the request has been completed and the result can be gathered. The logs field will contain the logs if the status operation was called with the with_logs parameter set to True. Metrics might contain the inference time, and other internal metadata (number of tokens processed, etc.).
+
+logs: list[dict[str, Any]] | None
+metrics: dict[str, Any]
+class fal_client.InProgress(logs)
+Bases: Status
+
+Indicates the request is currently being processed. If the status operation called with the with_logs parameter set to True, the logs field will be a list of log objects.
+
+logs: list[dict[str, Any]] | None
+class fal_client.Queued(position)
+Bases: Status
+
+Indicates the request is enqueued and waiting to be processed. The position field indicates the relative position in the queue (0-indexed).
+
+position: int
+class fal_client.Status
+Bases: object
+
+class fal_client.SyncClient(key=None, default_timeout=120.0)
+Bases: object
+
+cancel(application, request_id)
+Return type:
+None
+
+default_timeout: float = 120.0
+get_handle(application, request_id)
+Return type:
+SyncRequestHandle
+
+key: str | None = None
+result(application, request_id)
+Return type:
+dict[str, Any]
+
+run(application, arguments, *, path='', timeout=None, hint=None)
+Run an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return the result of the inference call directly.
+
+Return type:
+dict[str, Any]
+
+status(application, request_id, *, with_logs=False)
+Return type:
+Status
+
+stream(application, arguments, *, path='/stream', timeout=None)
+Stream the output of an application with the given arguments (which will be JSON serialized). This is only supported at a few select applications at the moment, so be sure to first consult with the documentation of individual applications to see if this is supported.
+
+The function will iterate over each event that is streamed from the server.
+
+Return type:
+Iterator[dict[str, Any]]
+
+submit(application, arguments, *, path='', hint=None, webhook_url=None, priority=None)
+Submit an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return a handle to the request that can be used to check the status and retrieve the result of the inference call when it is done.
+
+Return type:
+SyncRequestHandle
+
+subscribe(application, arguments, *, path='', hint=None, with_logs=False, on_enqueue=None, on_queue_update=None, priority=None)
+upload(data, content_type, file_name=None)
+Upload the given data blob to the CDN and return the access URL. The content type should be specified as the second argument. Use upload_file or upload_image for convenience.
+
+Return type:
+str
+
+upload_file(path)
+Upload a file from the local filesystem to the CDN and return the access URL.
+
+Return type:
+str
+
+upload_image(image, format='jpeg')
+Upload a pillow image object to the CDN and return the access URL.
+
+Return type:
+str
+
+class fal_client.SyncRequestHandle(request_id, response_url, status_url, cancel_url, client)
+Bases: _BaseRequestHandle
+
+cancel()
+Cancel the request.
+
+Return type:
+None
+
+cancel_url: str
+client: Client
+classmethod from_request_id(client, application, request_id)
+Return type:
+SyncRequestHandle
+
+get()
+Wait till the request is completed and return the result of the inference call.
+
+Return type:
+dict[str, Any]
+
+iter_events(*, with_logs=False, interval=0.1)
+Continuously poll for the status of the request and yield it at each interval till the request is completed. If with_logs is True, logs will be included in the response.
+
+Return type:
+Iterator[Status]
+
+request_id: str
+response_url: str
+status(*, with_logs=False)
+Returns the status of the request (which can be one of the following: Queued, InProgress, Completed). If with_logs is True, logs will be included for InProgress and Completed statuses.
+
+Return type:
+Status
+
+status_url: str
+fal_client.cancel(application, request_id)
+Return type:
+None
+
+async fal_client.cancel_async(application, request_id)
+Return type:
+None
+
+fal_client.encode(data, content_type)
+Encode the given data blob to a data URL with the specified content type.
+
+Return type:
+str
+
+fal_client.encode_file(path)
+Encode a file from the local filesystem to a data URL with the inferred content type.
+
+Return type:
+str
+
+fal_client.encode_image(image, format='jpeg')
+Encode a pillow image object to a data URL with the specified format.
+
+Return type:
+str
+
+fal_client.result(application, request_id)
+Return type:
+dict[str, Any]
+
+async fal_client.result_async(application, request_id)
+Return type:
+dict[str, Any]
+
+fal_client.run(application, arguments, *, path='', timeout=None, hint=None)
+Run an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return the result of the inference call directly.
+
+Return type:
+dict[str, Any]
+
+async fal_client.run_async(application, arguments, *, path='', timeout=None, hint=None)
+Run an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return the result of the inference call directly.
+
+Return type:
+dict[str, Any]
+
+fal_client.status(application, request_id, *, with_logs=False)
+Return type:
+Status
+
+async fal_client.status_async(application, request_id, *, with_logs=False)
+Return type:
+Status
+
+fal_client.stream(application, arguments, *, path='/stream', timeout=None)
+Stream the output of an application with the given arguments (which will be JSON serialized). This is only supported at a few select applications at the moment, so be sure to first consult with the documentation of individual applications to see if this is supported.
+
+The function will iterate over each event that is streamed from the server.
+
+Return type:
+Iterator[dict[str, Any]]
+
+async fal_client.stream_async(application, arguments, *, path='/stream', timeout=None)
+Stream the output of an application with the given arguments (which will be JSON serialized). This is only supported at a few select applications at the moment, so be sure to first consult with the documentation of individual applications to see if this is supported.
+
+The function will iterate over each event that is streamed from the server.
+
+Return type:
+AsyncIterator[dict[str, Any]]
+
+fal_client.submit(application, arguments, *, path='', hint=None, webhook_url=None, priority=None)
+Submit an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return a handle to the request that can be used to check the status and retrieve the result of the inference call when it is done.
+
+Return type:
+SyncRequestHandle
+
+async fal_client.submit_async(application, arguments, *, path='', hint=None, webhook_url=None, priority=None)
+Submit an application with the given arguments (which will be JSON serialized). The path parameter can be used to specify a subpath when applicable. This method will return a handle to the request that can be used to check the status and retrieve the result of the inference call when it is done.
+
+Return type:
+AsyncRequestHandle
+
+fal_client.subscribe(application, arguments, *, path='', hint=None, with_logs=False, on_enqueue=None, on_queue_update=None, priority=None)
+async fal_client.subscribe_async(application, arguments, *, path='', hint=None, with_logs=False, on_enqueue=None, on_queue_update=None, priority=None)
+fal_client
+Search
+Navigation
+Contents:
+
+fal_client
+fal_client package
+©2024, FAL Team. | Powered by Sphinx 8.1.3 & Alabaster 1.0.0 | Page source
